@@ -15,15 +15,15 @@ public class Pathf : MonoBehaviour
 
     }
 
-    // Update is called once per frame
+
     void Update()
     {
         if (startPos && lastPos && Input.GetKeyDown(KeyCode.Space))
         {
             Pathfinder(startPos, lastPos);
+            Debug.Log(isWayCheck(startPos, lastPos));
         }
     }
-
 
 
     private List<BaseDotWay> sonsReturner(List<BaseDotWay> dotWaySp, ref List<BaseDotWay> dotWayVisited, BaseDotWay finish)
@@ -33,7 +33,7 @@ public class Pathf : MonoBehaviour
         {
             foreach (BaseDotWay k in i.dotNeibors)
             {
-                if (!dotWayVisited.Contains(k))
+                if (!dotWayVisited.Contains(k) && k.dotState == 0)
                 {
                     spToReturn.Add(k);
                     dotWayVisited.Add(k);
@@ -44,12 +44,12 @@ public class Pathf : MonoBehaviour
                         lastRet = i;
                     }
                 }
-               
             }
         }
+        
         return spToReturn;
+        
     }
-
 
 
     private int isWay(BaseDotWay start, BaseDotWay finish)
@@ -59,10 +59,10 @@ public class Pathf : MonoBehaviour
         dotWaySp.Add(start);
         bool whileNotFinish = true;
         int counter = 0;
-
-        while(whileNotFinish)
+        while (whileNotFinish)
         {
-            foreach (BaseDotWay i in dotWaySp) {
+            foreach (BaseDotWay i in dotWaySp)
+            {
                 if (!dotWaySp.Contains(finish))
                 {
                     dotWaySp = sonsReturner(dotWaySp, ref dotWayVisited, finish);
@@ -70,29 +70,61 @@ public class Pathf : MonoBehaviour
                 }
                 else
                 {
-                    whileNotFinish = false; 
+                    whileNotFinish = false;
+                    break;
                 }
             }
         }
         return counter;
     }
 
-    private List<BaseDotWay> Pathfinder(BaseDotWay start, BaseDotWay finish)
+
+    public bool isWayCheck(BaseDotWay start, BaseDotWay finish)
     {
-        lastRet = finish;
-        PathWay = new List<BaseDotWay>();
-        BaseDotWay fin = finish;
-        while(isWay(start, fin) != 0)
+        List<BaseDotWay> dotWaySp = new List<BaseDotWay>();
+        List<BaseDotWay> dotWayVisited = new List<BaseDotWay>();
+        dotWaySp.Add(start);
+        bool whileNotFinish = true;
+        int counter = 0;
+        while (whileNotFinish)
         {
-            fin = lastRet;
+            foreach (BaseDotWay i in dotWaySp)
+            {
+                if (!dotWaySp.Contains(finish))
+                {
+                    dotWaySp = sonsReturner(dotWaySp, ref dotWayVisited, finish);
+                    counter++;
+                }
+                else
+                {
+                    whileNotFinish = false;
+                    break;
+                }
+                if(dotWaySp.Count == 0)
+                {
+                    return false;
+                }
+            }
         }
-        PathWay.Reverse();
-        PathWay.Add(finish);
-        Debug.Log(string.Join(",", PathWay));
-        return PathWay;
+        return true;
     }
 
 
-    
-
+    public List<BaseDotWay> Pathfinder(BaseDotWay start, BaseDotWay finish)
+    {
+        lastRet = finish;
+        PathWay = new List<BaseDotWay>();
+        if(isWayCheck(startPos, lastPos))
+        {
+            BaseDotWay fin = finish;
+            while (isWay(start, fin) != 0)
+            {
+                fin = lastRet;
+            }
+            PathWay.Reverse();
+            //Debug.Log(string.Join(",", PathWay));
+        }
+        PathWay.Add(finish);
+        return PathWay;
+    }
 }
